@@ -21,7 +21,7 @@ class Category(models.Model):
 
 class Tool(models.Model):
     """
-    Model representing an individual tool listed by a user.
+    Represents an individual tool listed by a user.
     Demonstrates CRUD and data modelling techniques.
     """
     category = models.ForeignKey(
