@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Community Tool Hub - Catalog</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="mb-4">Available Tools</h1>
+        <div class="row">
+            {% for tool in tools %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100">
+                    {% if tool.image %}
+                        <img src="{{ tool.image.url }}" class="card-img-top" alt="{{ tool.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ tool.name }}</h5>
+                        <p class="text-muted">{{ tool.category.friendly_name }}</p>
+                        <p class="card-text">Price: £{{ tool.price_per_day }}/day</p>
+                        <a href="#" class="btn btn-primary">View Details</a>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <p>No tools found in the catalog yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
