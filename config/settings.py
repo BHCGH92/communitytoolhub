@@ -141,3 +141,7 @@ CLOUDINARY_STORAGE = {
 }
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://community-tool-hub-6379e0abf9cb.herokuapp.com'
+]
