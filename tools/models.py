@@ -1,3 +1,7 @@
+import os
+from django.db.models.signals import post_migrate
+from django.contrib.auth import get_user_model
+from django.dispatch import receiver
 from django.db import models
 from django.contrib.auth.models import User
 
@@ -44,3 +48,19 @@ class Tool(models.Model):
 
     def __str__(self):
         return self.name
+    
+
+# Automatically create a superuser after migrations
+@receiver(post_migrate)
+def create_superuser(sender, **kwargs):
+    User = get_user_model()
+    # Pull values from environment variables instead of hard-coding them
+    username = os.getenv('ADMIN_USERNAME')
+    email = os.getenv('ADMIN_EMAIL')
+    password = os.getenv('ADMIN_PASSWORD')
+
+    # Only run if all variables are set and user doesn't exist yet
+    if username and email and password:
+        if not User.objects.filter(username=username).exists():
+            User.objects.create_superuser(username, email, password)
+            print(f"Superuser '{username}' created automatically.")
