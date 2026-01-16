@@ -114,6 +114,10 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# This line is just to stop the Cloudinary library from crashing on Django 6.0
+STATICFILES_STORAGE = 'cloudinary_storage.storage.StaticCloudinaryStorage'
+
+# Modern Djanogo solution for static files
 STORAGES = {
     "default": {
         "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
