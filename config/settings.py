@@ -12,7 +12,7 @@ DEBUG = os.getenv('DEBUG') == 'True'
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
-ALLOWED_HOSTS = ['community-tool-hub.herokuapp.com', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['.herokuapp.com', '127.0.0.1', 'localhost']
 
 
 # Application definition
