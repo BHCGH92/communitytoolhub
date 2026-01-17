@@ -1,4 +1,5 @@
 from django.shortcuts import render
+from django.views.generic import DetailView
 from .models import Tool
 
 def all_tools(request):
@@ -15,3 +16,12 @@ def all_tools(request):
 
     # 3. Return the render function with the template path
     return render(request, 'tools/tools.html', context)
+
+class ToolDetailView(DetailView):
+    """
+    Renders a detailed view for a specific tool instance,
+    including its description, image, and availability.
+    """
+    model = Tool
+    template_name = 'tools/tool_detail.html'
+    context_object_name = 'tool'
