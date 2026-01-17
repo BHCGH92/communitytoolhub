@@ -3,6 +3,9 @@ from .models import Category, Tool, Borrowing
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
+    """
+    Customizes the admin interface for Category records.
+    """
     list_display = (
         'friendly_name',
         'name',
@@ -10,6 +13,9 @@ class CategoryAdmin(admin.ModelAdmin):
 
 @admin.register(Tool)
 class ToolAdmin(admin.ModelAdmin):
+    """
+    Customizes the admin interface for Tool records.
+    """
     list_display = (
         'name',
         'category',
