@@ -4,4 +4,5 @@ from . import views
 urlpatterns = [
     path('', views.all_tools, name='tool_list'),
     path('<int:pk>/', views.ToolDetailView.as_view(), name='tool_detail'),
+    path('borrow/<int:tool_id>/', views.borrow_tool, name='borrow_tool'),
 ]

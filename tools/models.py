@@ -49,6 +49,18 @@ class Tool(models.Model):
     def __str__(self):
         return self.name
     
+class Borrowing(models.Model):
+    """
+    Records the borrowing of a tool by a user, including dates and status.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='borrows')
+    tool = models.ForeignKey(Tool, on_delete=models.CASCADE, related_name='borrows')
+    borrowed_date = models.DateField(auto_now_add=True)
+    return_date = models.DateField()
+    is_returned = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"{self.user.username} borrowed {self.tool.name}"
 
 # Automatically create a superuser after migrations
 @receiver(post_migrate)

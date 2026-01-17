@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Category, Tool
+from .models import Category, Tool, Borrowing
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
@@ -22,3 +22,12 @@ class ToolAdmin(admin.ModelAdmin):
     list_filter = ('category', 'is_available')
     # Adds a search bar for better User experience
     search_fields = ('name', 'description')
+
+@admin.register(Borrowing)
+class BorrowingAdmin(admin.ModelAdmin):
+    """
+    Customizes the admin interface for Borrowing records.
+    """
+    list_display = ('tool', 'user', 'borrowed_date', 'return_date', 'is_returned')
+    list_filter = ('is_returned', 'borrowed_date')
+    search_fields = ('user__username', 'tool__name')
