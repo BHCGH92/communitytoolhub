@@ -19,7 +19,6 @@ class ToolAdmin(admin.ModelAdmin):
     list_display = (
         'name',
         'category',
-        'owner',
         'price_per_day',
         'is_available',
         'created_at',

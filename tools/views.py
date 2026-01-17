@@ -27,17 +27,23 @@ class ToolDetailView(DetailView):
 @login_required
 def borrow_tool(request, tool_id):
     """
-    Handles the logic for borrowing a tool.
-    Creates a Borrowing record for the logged-in user.
+    Processes a borrowing request for a specific tool.
+    Checks availability, creates a Borrowing record for the current user,
+    sets a 7-day return date, and marks the tool as unavailable.
     """
     tool = get_object_or_404(Tool, id=tool_id)
     
-    return_date = timezone.now().date() + timedelta(days=7)
-    
-    Borrowing.objects.create(
-        user=request.user,
-        tool=tool,
-        return_date=return_date
-    )
-    
+    if tool.is_available:
+        return_date = timezone.now().date() + timedelta(days=7)
+        
+        Borrowing.objects.create(
+            user=request.user,
+            tool=tool,
+            return_date=return_date
+        )
+        
+        # This is the part that makes the database "care"
+        tool.is_available = False
+        tool.save() 
+        
     return redirect('tool_list')

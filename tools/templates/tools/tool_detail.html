@@ -23,10 +23,14 @@
 
             <div class="mt-3">
                 <a href="{% url 'tool_list' %}" class="btn btn-outline-secondary">Back to Hub</a>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'borrow_tool' tool.id %}" class="btn btn-success">Confirm Borrowing</a>
+                {% if tool.is_available %}
+                    {% if user.is_authenticated %}
+                        <a href="{% url 'borrow_tool' tool.id %}" class="btn btn-success">Confirm Borrowing</a>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-warning">Login to Borrow</a>
+                    {% endif %}
                 {% else %}
-                    <a href="{% url 'login' %}" class="btn btn-warning">Login to Borrow</a>
+                    <button class="btn btn-secondary" disabled>Currently on Loan</button>
                 {% endif %}
             </div>
         </div>
