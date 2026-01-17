@@ -37,7 +37,10 @@
                                     {% if borrow.is_returned %}
                                         <span class="badge bg-success">Returned</span>
                                     {% else %}
-                                        <span class="badge bg-warning text-dark">On Loan</span>
+                                        <div class="d-flex align-items-center gap-2">
+                                            <span class="badge bg-warning text-dark">On Loan</span>
+                                            <a href="{% url 'return_tool' borrow.id %}" class="btn btn-sm btn-outline-primary">Return</a>
+                                        </div>
                                     {% endif %}
                                 </td>
                             </tr>

@@ -47,3 +47,20 @@ def borrow_tool(request, tool_id):
         tool.save() 
         
     return redirect('tool_list')
+
+@login_required
+def return_tool(request, borrowing_id):
+    """
+    Handles returning a tool. Updates the borrowing record 
+    and makes the tool available for others to borrow again.
+    """
+    borrowing = get_object_or_404(Borrowing, id=borrowing_id, user=request.user)
+    
+    borrowing.is_returned = True
+    borrowing.save()
+
+    tool = borrowing.tool
+    tool.is_available = True
+    tool.save()
+    
+    return redirect('profile')

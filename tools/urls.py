@@ -5,4 +5,5 @@ urlpatterns = [
     path('', views.all_tools, name='tool_list'),
     path('<int:pk>/', views.ToolDetailView.as_view(), name='tool_detail'),
     path('borrow/<int:tool_id>/', views.borrow_tool, name='borrow_tool'),
+    path('return/<int:borrowing_id>/', views.return_tool, name='return_tool'),
 ]
