@@ -18,7 +18,10 @@ class UserProfile(models.Model):
 
 @receiver(post_save, sender=User)
 def create_or_update_user_profile(sender, instance, created, **kwargs):
-    """Create or update the user profile whenever the User object is saved"""
     if created:
         UserProfile.objects.create(user=instance)
+    else:
+        # Use get_or_create to handle any existing users who missed the signal
+        UserProfile.objects.get_or_create(user=instance)
     instance.userprofile.save()
+
