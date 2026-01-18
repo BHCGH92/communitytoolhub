@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import timedelta
 from .models import Tool, Borrowing
+from django.contrib import messages
 
 def all_tools(request):
     """ 
@@ -44,7 +45,8 @@ def borrow_tool(request, tool_id):
         
         # This is the part that makes the database "care"
         tool.is_available = False
-        tool.save() 
+        tool.save()
+        messages.success(request, f'Success! You have borrowed {tool.name}.')
         
     return redirect('tool_list')
 
@@ -62,5 +64,6 @@ def return_tool(request, borrowing_id):
     tool = borrowing.tool
     tool.is_available = True
     tool.save()
+    messages.info(request, f'Thank you! {tool.name} has been registered as returned.')
     
     return redirect('profile')
