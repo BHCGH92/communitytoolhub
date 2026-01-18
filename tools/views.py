@@ -58,12 +58,11 @@ def return_tool(request, borrowing_id):
     """
     borrowing = get_object_or_404(Borrowing, id=borrowing_id, user=request.user)
     
-    borrowing.is_returned = True
+    # Change status to pending review
+    borrowing.status = 'pending'
     borrowing.save()
-
-    tool = borrowing.tool
-    tool.is_available = True
-    tool.save()
-    messages.info(request, f'Thank you! {tool.name} has been registered as returned.')
     
+    # Note: We do NOT set tool.is_available = True yet!
+    
+    messages.info(request, f'Thank you. {borrowing.tool.name} is now awaiting admin review.')
     return redirect('profile')

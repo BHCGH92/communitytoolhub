@@ -43,14 +43,22 @@ class Borrowing(models.Model):
     """
     Records the borrowing transaction between a User and a Hub Tool.
     """
+    STATUS_CHOICES = [
+        ('active', 'On Loan'),
+        ('pending', 'Awaiting Review'),
+        ('returned', 'Available'),
+        ('disputed', 'Disputed'),
+    ]
+    
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='borrows')
     tool = models.ForeignKey(Tool, on_delete=models.CASCADE, related_name='borrows')
     borrowed_date = models.DateField(auto_now_add=True)
     return_date = models.DateField()
-    is_returned = models.BooleanField(default=False)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
+    admin_notes = models.TextField(blank=True, null=True) # For feedback/damage notes
 
     def __str__(self):
-        return f"{self.user.username} borrowed {self.tool.name}"
+        return f"{self.tool.name} - {self.status}"
 
 @receiver(post_migrate)
 def create_superuser(sender, **kwargs):

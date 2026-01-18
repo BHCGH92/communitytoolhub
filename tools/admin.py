@@ -31,8 +31,19 @@ class ToolAdmin(admin.ModelAdmin):
 @admin.register(Borrowing)
 class BorrowingAdmin(admin.ModelAdmin):
     """
-    Customizes the admin interface for Borrowing records.
+    Allows admin for borrowing records to update status and add notes.
     """
-    list_display = ('tool', 'user', 'borrowed_date', 'return_date', 'is_returned')
-    list_filter = ('is_returned', 'borrowed_date')
-    search_fields = ('user__username', 'tool__name')
+    list_display = ('tool', 'user', 'status', 'borrowed_date')
+    list_filter = ('status',)
+
+    def save_model(self, request, obj, form, change):
+        # If the admin sets the status to 'returned', automatically make the tool available
+        if obj.status == 'returned':
+            obj.tool.is_available = True
+            obj.tool.save()
+        # If the admin sets it to 'disputed' or 'active', ensure it's unavailable
+        elif obj.status in ['active', 'pending', 'disputed']:
+            obj.tool.is_available = False
+            obj.tool.save()
+            
+        super().save_model(request, obj, form, change)

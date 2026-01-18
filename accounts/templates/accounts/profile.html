@@ -34,13 +34,20 @@
                                 <td>{{ borrow.borrowed_date }}</td>
                                 <td>{{ borrow.return_date }}</td>
                                 <td>
-                                    {% if borrow.is_returned %}
-                                        <span class="badge bg-success">Returned</span>
-                                    {% else %}
+                                    {% if borrow.status == 'active' %}
                                         <div class="d-flex align-items-center gap-2">
                                             <span class="badge bg-warning text-dark">On Loan</span>
                                             <a href="{% url 'return_tool' borrow.id %}" class="btn btn-sm btn-outline-primary">Return</a>
                                         </div>
+                                    {% elif borrow.status == 'pending' %}
+                                        <span class="badge bg-info text-dark">Awaiting Admin Review</span>
+                                    {% elif borrow.status == 'returned' %}
+                                        <span class="badge bg-success">Returned</span>
+                                    {% elif borrow.status == 'disputed' %}
+                                        <span class="badge bg-danger">Disputed</span>
+                                        {% if borrow.admin_notes %}
+                                            <small class="d-block text-muted mt-1">Note: {{ borrow.admin_notes }}</small>
+                                        {% endif %}
                                     {% endif %}
                                 </td>
                             </tr>
