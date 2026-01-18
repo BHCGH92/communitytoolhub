@@ -5,14 +5,25 @@ from django.utils import timezone
 from datetime import timedelta
 from .models import Tool, Borrowing
 from django.contrib import messages
+from django.db.models import Q
 
 def all_tools(request):
     """ 
     A view to show all tools, including sorting and search queries.
     """
     tools = Tool.objects.all()
+    query = request.GET.get('q')
+
+    if query:
+        # Filter by tool name OR category name
+        tools = tools.filter(
+            Q(name__icontains=query) | 
+            Q(category__name__icontains=query)
+        )
+
     context = {
         'tools': tools,
+        'search_term': query,
     }
     return render(request, 'tools/tools.html', context)
 
