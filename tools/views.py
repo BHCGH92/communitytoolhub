@@ -77,3 +77,23 @@ def return_tool(request, borrowing_id):
     
     messages.info(request, f'Thank you. {borrowing.tool.name} is now awaiting admin review.')
     return redirect('profile')
+
+@login_required
+def resolve_dispute(request, borrowing_id):
+    """
+    Handles the user's response to a dispute. Captures their notes,
+    updates the status to pending, and sends it back to the admin.
+    """
+    borrowing = get_object_or_404(Borrowing, id=borrowing_id, user=request.user)
+    
+    if request.method == 'POST' and borrowing.status == 'disputed':
+        user_msg = request.POST.get('user_notes')
+        
+        # Update the record with the user's explanation
+        borrowing.user_notes = user_msg
+        borrowing.status = 'pending'  # Move back to admin's "to-do" list
+        borrowing.save()
+        
+        messages.success(request, f"Your resolution note for {borrowing.tool.name} has been sent to the admin.")
+    
+    return redirect('profile')

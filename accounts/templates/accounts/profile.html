@@ -15,23 +15,28 @@
         </div>
 
         <div class="col-md-8">
-            <h2 class="mb-4">My Borrowed Tools</h2>
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>My Borrowed Tools</h2>
+                <form method="GET" class="d-flex">
+                    <input type="text" name="pq" class="form-control form-control-sm me-2" placeholder="Search my tools..." value="{{ request.GET.pq|default:'' }}">
+                    <button class="btn btn-sm btn-outline-primary" type="submit">Filter</button>
+                </form>
+            </div>
+
             <div class="card shadow-sm">
                 <div class="table-responsive">
                     <table class="table table-hover mb-0">
                         <thead class="table-dark">
                             <tr>
                                 <th>Tool</th>
-                                <th>Date Borrowed</th>
                                 <th>Due Date</th>
-                                <th>Status</th>
+                                <th>Status / Action</th>
                             </tr>
                         </thead>
                         <tbody>
                             {% for borrow in my_borrows %}
                             <tr>
                                 <td><strong>{{ borrow.tool.name }}</strong></td>
-                                <td>{{ borrow.borrowed_date }}</td>
                                 <td>{{ borrow.return_date }}</td>
                                 <td>
                                     {% if borrow.status == 'active' %}
@@ -40,22 +45,40 @@
                                             <a href="{% url 'return_tool' borrow.id %}" class="btn btn-sm btn-outline-primary">Return</a>
                                         </div>
                                     {% elif borrow.status == 'pending' %}
-                                        <span class="badge bg-info text-dark">Awaiting Admin Review</span>
+                                        <span class="badge bg-info text-dark">Awaiting Review</span>
                                     {% elif borrow.status == 'returned' %}
                                         <span class="badge bg-success">Returned</span>
                                     {% elif borrow.status == 'disputed' %}
-                                        <span class="badge bg-danger">Disputed</span>
-                                        {% if borrow.admin_notes %}
-                                            <small class="d-block text-muted mt-1">Note: {{ borrow.admin_notes }}</small>
-                                        {% endif %}
+                                        <div class="p-2 border border-danger rounded bg-light">
+                                            <span class="badge bg-danger mb-2">Disputed</span>
+                                            
+                                            {% if borrow.admin_notes %}
+                                                <div class="alert alert-secondary py-1 px-2 small mb-2">
+                                                    <strong>Admin Note:</strong> {{ borrow.admin_notes }}
+                                                </div>
+                                            {% endif %}
+
+                                            {% if borrow.user_notes %}
+                                                <div class="alert alert-info py-1 px-2 small mb-2">
+                                                    <strong>Your last note:</strong> {{ borrow.user_notes }}
+                                                </div>
+                                            {% endif %}
+
+                                            <form action="{% url 'resolve_dispute' borrow.id %}" method="POST">
+                                                {% csrf_token %}
+                                                <div class="mb-2">
+                                                    <textarea name="user_notes" class="form-control form-control-sm" rows="2" 
+                                                              placeholder="Explain how you resolved this..." required></textarea>
+                                                </div>
+                                                <button type="submit" class="btn btn-sm btn-success w-100">Send for Re-review</button>
+                                            </form>
+                                        </div>
                                     {% endif %}
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="4" class="text-center py-4 text-muted">
-                                    You haven't borrowed any tools yet.
-                                </td>
+                                <td colspan="3" class="text-center py-4 text-muted">No borrowings found.</td>
                             </tr>
                             {% endfor %}
                         </tbody>

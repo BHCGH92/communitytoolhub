@@ -56,6 +56,7 @@ class Borrowing(models.Model):
     return_date = models.DateField()
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     admin_notes = models.TextField(blank=True, null=True) # For feedback/damage notes
+    user_notes = models.TextField(blank=True, null=True) # For user resolved comments
 
     def __str__(self):
         return f"{self.tool.name} - {self.status}"

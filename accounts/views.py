@@ -20,11 +20,13 @@ def register(request):
 
 @login_required
 def profile_view(request):
-    """
-    Displays the user's profile and a list of their borrowed tools.
-    """
+    """View to display the user's profile and their borrowing history."""
+    query = request.GET.get('pq')
     my_borrows = Borrowing.objects.filter(user=request.user).order_by('-borrowed_date')
-    
+
+    if query:
+        my_borrows = my_borrows.filter(tool__name__icontains=query)
+
     context = {
         'my_borrows': my_borrows,
     }
