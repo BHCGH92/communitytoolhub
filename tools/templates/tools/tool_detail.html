@@ -26,7 +26,7 @@
                 
                 {% if tool.is_available %}
                     {% if user.is_authenticated %}
-                        <a href="{% url 'borrow_tool' tool.id %}" class="btn btn-success">Confirm Borrowing</a>
+                        <a href="{% url 'create_checkout_session' tool.id %}" class="btn btn-success">Pay & Confirm Borrowing</a>
                     {% else %}
                         <a href="{% url 'login' %}" class="btn btn-warning">Login to Borrow</a>
                     {% endif %}
