@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.utils import timezone
 from datetime import timedelta
 from tools.models import Tool, Borrowing
+from django.db import transaction
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -40,24 +41,38 @@ def create_checkout_session(request, tool_id):
         return redirect('tool_detail', pk=tool.id)
 
 def payment_success(request):
-    """ Processes the borrowing record after successful payment """
     tool_id = request.GET.get('tool_id')
     tool = get_object_or_404(Tool, id=tool_id)
     
-    # Create the borrowing record only upon successful payment return
-    return_date = timezone.now().date() + timedelta(days=7)
-    Borrowing.objects.create(
-        user=request.user,
-        tool=tool,
-        return_date=return_date,
-        status='active'
-    )
+    # GUARD Clause: Check if the tool is still actually available
+    # We use select_for_update() to 'lock' the row during this check...
+    try:
+        with transaction.atomic():
+            # Refresh the tool data from the DB to be 100% sure of its status
+            tool_to_lock = Tool.objects.select_for_update().get(id=tool.id)
+            
+            if not tool_to_lock.is_available:
+                messages.error(request, "Too late! Someone else finished their payment just before you. Please contact support for a refund.")
+                return redirect('tool_list')
+
+            # 2. SUCCESS PATH: Create the record
+            return_date = timezone.now().date() + timedelta(days=7)
+            Borrowing.objects.create(
+                user=request.user,
+                tool=tool_to_lock,
+                return_date=return_date,
+                status='active'
+            )
+            
+            # 3. Mark as unavailable immediately
+            tool_to_lock.is_available = False
+            tool_to_lock.save()
+
+    except Exception as e:
+        messages.error(request, "A system error occurred. Please contact support.")
+        return redirect('tool_list')
     
-    # Update tool availability
-    tool.is_available = False
-    tool.save()
-    
-    messages.success(request, f"Payment successful! You have borrowed {tool.name}.")
+    messages.success(request, f"Payment Confirmed! {tool.name} is now reserved for you.")
     return render(request, 'payment_success.html', {'tool': tool})
 
 def payment_cancel(request):
