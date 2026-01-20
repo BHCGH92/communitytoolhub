@@ -127,23 +127,26 @@ def stripe_webhook(request):
     return HttpResponse(status=200)
 
 def finalize_checkout(tool_id, user_id):
-    """
-    An internal helper function to update the database.
-    """
-    user = User.objects.get(id=user_id)
-    
-    with transaction.atomic():
-        # Select for update ensures no race conditions even in the background 
-        tool = Tool.objects.select_for_update().get(id=tool_id)
+    try:
+        # Explicitly convert to int to prevent lookup crashes
+        u_id = int(user_id)
+        t_id = int(tool_id)
         
-        if tool.is_available:
-            return_date = timezone.now().date() + timedelta(days=7)
-            # Use get_or_create to prevent duplicate borrowing records
-            Borrowing.objects.get_or_create(
-                user=user,
-                tool=tool,
-                status='active',
-                defaults={'return_date': return_date}
-            )
-            tool.is_available = False
-            tool.save()
+        user = User.objects.get(id=u_id)
+        
+        with transaction.atomic():
+            tool = Tool.objects.select_for_update().get(id=t_id)
+            
+            if tool.is_available:
+                return_date = timezone.now().date() + timedelta(days=7)
+                Borrowing.objects.get_or_create(
+                    user=user,
+                    tool=tool,
+                    status='active',
+                    defaults={'return_date': return_date}
+                )
+                tool.is_available = False
+                tool.save()
+    except Exception as e:
+        # This prevents a 500 and lets you see the error in Heroku logs
+        print(f"WEBHOOK ERROR: {e}")
