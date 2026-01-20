@@ -7,6 +7,9 @@ from django.utils import timezone
 from datetime import timedelta
 from tools.models import Tool, Borrowing
 from django.db import transaction
+from django.views.decorators.csrf import csrf_exempt
+from django.http import HttpResponse
+from django.contrib.auth.models import User
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -21,6 +24,11 @@ def create_checkout_session(request, tool_id):
     try:
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
+            # METADATA: Crucial for the webhook to identify the user and tool
+            metadata={
+                'tool_id': tool.id,
+                'user_id': request.user.id
+            },
             line_items=[{
                 'price_data': {
                     'currency': 'gbp',
@@ -52,6 +60,16 @@ def payment_success(request):
             tool_to_lock = Tool.objects.select_for_update().get(id=tool.id)
             
             if not tool_to_lock.is_available:
+                # Check if the webhook already processed this
+                already_borrowed = Borrowing.objects.filter(
+                    tool=tool_to_lock, 
+                    user=request.user, 
+                    status='active'
+                ).exists()
+                
+                if already_borrowed:
+                    return render(request, 'payment_success.html', {'tool': tool})
+
                 messages.error(request, "Too late! Someone else finished their payment just before you. Please contact support for a refund.")
                 return redirect('tool_list')
 
@@ -79,3 +97,53 @@ def payment_cancel(request):
     """ Handles cases where the user cancels the payment process """
     messages.warning(request, "Payment cancelled. The tool has not been borrowed.")
     return render(request, 'payment_cancel.html')
+
+@csrf_exempt
+def stripe_webhook(request):
+    """
+    Handles background payment confirmation. 
+    """
+    payload = request.body
+    sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
+    endpoint_secret = settings.STRIPE_WEBHOOK_SECRET 
+
+    try:
+        event = stripe.Webhook.construct_event(
+            payload, sig_header, endpoint_secret
+        )
+    except Exception as e:
+        return HttpResponse(status=400)
+
+    if event['type'] == 'checkout.session.completed':
+        session = event['data']['object']
+        
+        # Extract metadata
+        tool_id = session.get('metadata', {}).get('tool_id')
+        user_id = session.get('metadata', {}).get('user_id')
+        
+        if tool_id and user_id:
+            finalize_checkout(tool_id, user_id)
+
+    return HttpResponse(status=200)
+
+def finalize_checkout(tool_id, user_id):
+    """
+    An internal helper function to update the database.
+    """
+    user = User.objects.get(id=user_id)
+    
+    with transaction.atomic():
+        # Select for update ensures no race conditions even in the background 
+        tool = Tool.objects.select_for_update().get(id=tool_id)
+        
+        if tool.is_available:
+            return_date = timezone.now().date() + timedelta(days=7)
+            # Use get_or_create to prevent duplicate borrowing records
+            Borrowing.objects.get_or_create(
+                user=user,
+                tool=tool,
+                status='active',
+                defaults={'return_date': return_date}
+            )
+            tool.is_available = False
+            tool.save()
