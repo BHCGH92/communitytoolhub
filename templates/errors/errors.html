@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container text-center mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h1 class="display-1 text-danger"><strong>{{ status_code }}</strong></h1>
+            <hr>
+            <h2 class="mb-4">{{ error_title }}</h2>
+            <p class="lead text-muted">{{ error_message }}</p>
+            
+            <div class="mt-5">
+                <a href="{% url 'tool_list' %}" class="btn btn-lg btn-success">
+                    <i class="fas fa-home"></i> Back to the Tool Hub
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

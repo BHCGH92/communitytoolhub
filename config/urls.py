@@ -31,5 +31,8 @@ urlpatterns = [
     path('checkout/', include('checkout.urls')),
 ]
 
+handler404 = 'tools.views.error_404'
+handler500 = 'tools.views.error_500'
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -97,3 +97,22 @@ def resolve_dispute(request, borrowing_id):
         messages.success(request, f"Your resolution note for {borrowing.tool.name} has been sent to the admin.")
     
     return redirect('profile')
+
+# Error Handlers
+def error_404(request, exception):
+    """ Handles 404 - Page Not Found """
+    context = {
+        'status_code': 404,
+        'error_title': 'Oops! Tool Not Found',
+        'error_message': 'It looks like you followed a broken link or typed in a URL that doesn\'t exist in our hub.'
+    }
+    return render(request, 'errors/error.html', context, status=404)
+
+def error_500(request):
+    """ Handles 500 - Server Error """
+    context = {
+        'status_code': 500,
+        'error_title': 'System Glitch',
+        'error_message': 'Our server ran into a snag. Don\'t worry, our team is looking into it.'
+    }
+    return render(request, 'errors/error.html', context, status=500)
