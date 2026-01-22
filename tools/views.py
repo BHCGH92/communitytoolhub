@@ -1,3 +1,4 @@
+from django.core.paginator import Paginator
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import DetailView
 from django.contrib.auth.decorators import login_required
@@ -9,20 +10,25 @@ from django.db.models import Q
 
 def all_tools(request):
     """ 
-    A view to show all tools, including sorting and search queries.
+    A view to show all tools, including sorting, search queries, and pagination.
     """
-    tools = Tool.objects.all()
+    # Order by newest first for better UX
+    tools_list = Tool.objects.all().order_by('-id') 
     query = request.GET.get('q')
 
     if query:
-        # Filter by tool name OR category name
-        tools = tools.filter(
+        tools_list = tools_list.filter(
             Q(name__icontains=query) | 
             Q(category__name__icontains=query)
         )
 
+    # Show 6 tools per page
+    paginator = Paginator(tools_list, 6) 
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'tools': tools,
+        'page_obj': page_obj,
         'search_term': query,
     }
     return render(request, 'tools/tools.html', context)

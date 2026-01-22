@@ -21,7 +21,7 @@
     </div>
 
     <div class="tool-grid">
-        {% for tool in tools %}
+        {% for tool in page_obj %}
             <div class="tool-card">
                 <div class="card-img-container">
                     <img src="{{ tool.image.url }}" alt="{{ tool.name }}">
@@ -33,7 +33,7 @@
                     
                     <div class="card-footer-custom">
                         <div class="price-tag">
-                            £{{ tool.price_per_day }}<span> / day</span>
+                            £{{ tool.price_per_day }}<span>/ day</span>
                         </div>
                         <a href="{% url 'tool_detail' tool.id %}" class="btn-view">
                             View Details
@@ -48,5 +48,25 @@
             </div>
         {% endfor %}
     </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="pagination-container text-center mt-5 mb-5">
+        <div class="step-links">
+            {% if page_obj.has_previous %}
+                <a href="?page=1{% if search_term %}&q={{ search_term }}{% endif %}" class="btn btn-outline-dark">&laquo; First</a>
+                <a href="?page={{ page_obj.previous_page_number }}{% if search_term %}&q={{ search_term }}{% endif %}" class="btn btn-outline-dark">Previous</a>
+            {% endif %}
+
+            <span class="current-page mx-3">
+                <strong>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</strong>
+            </span>
+
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if search_term %}&q={{ search_term }}{% endif %}" class="btn btn-outline-dark">Next</a>
+                <a href="?page={{ page_obj.paginator.num_pages }}{% if search_term %}&q={{ search_term }}{% endif %}" class="btn btn-outline-dark">Last &raquo;</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
 </div>
 {% endblock %}

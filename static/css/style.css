@@ -55,6 +55,7 @@ footer {
 
 footer, p {
     color: var(--light-gray);
+    font-family: 'Oswald', sans-serif;
 }
 
 /* Navbar Styles */
@@ -200,3 +201,22 @@ nav.navbar.custom-navbar {
 }
 
 /* End of Card style for tools */
+
+/* Custom Pagination Styling */
+.step-links .btn-outline-dark {
+    border-color: var(--dark-charcoal);
+    color: var(--dark-charcoal);
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.step-links .btn-outline-dark:hover {
+    background-color: var(--brand-orange);
+    border-color: var(--brand-orange);
+    color: white !important;
+}
+
+.current-page {
+    color: var(--dark-charcoal);
+    font-size: 0.95rem;
+}
