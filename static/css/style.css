@@ -1,0 +1,202 @@
+/* Google Font Import */
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Oswald:wght@200..700&display=swap');
+
+:root {
+    /* Primary Colors */
+    --brand-orange: #F57C00;    /* The main action color */
+    --brand-orange-hover: #e65100;
+    
+    /* Neutral Palette */
+    --dark-charcoal: #292828;   /* Navbar and Headers */
+    --light-gray: #f4f4f4f3;      /* Backgrounds */
+    
+    /* Text Colors */
+    --text-main: #212121;
+    --text-muted: #757575;
+    --text-link:#3A5F7D;    /* Link color */
+    
+    /* UI States */
+    --success-green: #2e7d32;
+}
+
+/* Global Styles */
+
+body {
+    background-color: var(--light-gray) !important;
+    color: var(--text-main);
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    font-family: 'Oswald', sans-serif;
+    color: var(--dark-charcoal);
+}
+
+p, a, li, span {
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+}
+
+main, .container {
+    flex: 1 0 auto;
+}
+
+footer {
+    flex-shrink: 0;
+    border-top: 3px solid var(--brand-orange);
+    background-color: var(--dark-charcoal) !important;
+    color: var(--white);
+    padding: 20px 0;
+    text-align: center;
+}
+
+footer, p {
+    color: var(--light-gray);
+}
+
+/* Navbar Styles */
+
+nav.navbar.custom-navbar {
+    background-color: var(--dark-charcoal) !important;
+}
+
+.navbar-title{
+    font-family: 'Oswald', sans-serif;
+    font-size: 1.8rem !important;
+    color: var(--light-gray) !important;
+}
+
+.nav-link:hover {
+    color: var(--brand-orange) !important;
+}
+
+/* Button Styles */
+
+.btn-outline-danger {
+    border-color: var(--brand-orange) !important;
+    color: var(--brand-orange) !important;
+}
+
+.search-bar-button {
+    background-color: var(--brand-orange) !important;
+    color: #ffffff !important;
+    border-color: var(--brand-orange) !important;
+    border-radius: 8px;
+    padding: 6px 15px;
+    font-size: 1rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s;
+}
+
+
+/* Card and grid styles */
+
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, 300px); 
+    justify-content: center;
+    gap: 30px;
+    padding: 40px 20px;
+    max-width: 100%; 
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.tool-card {
+    background: var(--white);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.tool-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+}
+
+.card-img-container {
+    height: 250px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: #fcfcfc;
+    overflow: hidden;
+}
+
+.card-img-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.card-body-custom {
+    padding: 25px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.tool-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark-charcoal);
+    margin-bottom: 5px;
+}
+
+.tool-subtitle {
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    margin-bottom: 20px;
+}
+
+.card-footer-custom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: auto;
+}
+
+.price-tag {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--text-main);
+    display: flex;
+    align-items: baseline;
+}
+
+.price-tag span {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    font-weight: 400;
+    margin-left: 2px;
+}
+
+.btn-view {
+    background-color: var(--brand-orange);
+    color: #ffffff !important;
+    border-radius: 8px;
+    padding: 6px 15px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s;
+}
+
+.btn-view:hover {
+    background-color: var(--brand-orange-hover);
+    color: var(--white);
+}
+
+/* End of Card style for tools */
