@@ -327,6 +327,30 @@ nav.navbar.custom-navbar {
 }
 
 
+/* Tool Details Page Styling */
+
+tool-description-text, p {
+    color: var(--dark-charcoal);
+}
+
+.text-rent {
+    font-style: italic;
+    font-size: 0.8rem;
+}
+
+btn-borrow, btn-lg {
+    background-color: var(--brand-orange);
+    color: #ffffff !important;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.2s;
+}
+
+
 /* Auth styling */
 
 /* 1. Target the 'Password confirmation' and rules specifically */

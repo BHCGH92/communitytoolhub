@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
-{% block content %}
 {% load static %}
+
+{% block content %}
 <div class="container mt-5 pt-4 mb-5">
     <div class="row">
         <div class="col-lg-7">
@@ -8,9 +9,10 @@
                 {% if tool.image %}
                     <img src="{{ tool.image.url }}" class="img-fluid main-tool-img" alt="{{ tool.name }}">
                 {% else %}
-                    <img src="/static/images/default-tool.png" class="img-fluid main-tool-img" alt="Default Tool Image">
+                    <img src="{% static 'images/default-tool.png' %}" class="img-fluid main-tool-img" alt="Default Tool Image">
                 {% endif %}
             </div>
+            <h3 class="mt-2 h4 font-oswald">{{ tool.name }}</h3>
 
             <div class="tool-info-tabs mt-4">
                 <ul class="nav nav-tabs" id="toolTab" role="tablist">
@@ -41,7 +43,7 @@
         </div>
 
         <div class="col-lg-5">
-            <div class="card borrow-card shadow-lg sticky-top" style="top: 100px; z-index: 10;">
+            <div class="card borrow-card shadow-lg sticky-top mt-2 mt-lg-0" style="top: 100px; z-index: 10;">
                 <div class="card-header bg-dark text-light p-3">
                     <h3 class="mb-0 h4 font-oswald">{{ tool.name }}</h3>
                 </div>
@@ -49,28 +51,40 @@
                     <div class="price-display mb-4">
                         <span class="h2 fw-bold text-orange">£{{ tool.price_per_day }}</span>
                         <span class="text-muted">/ per day</span>
+                        <br>
+                        <span class="text-muted text-rent">7 day minimum rent period</span>
                         <div class="tool-badges mt-3 d-flex justify-content-left gap-2">
                         {% if tool.is_available %}
-                        <span class="badge bg-success px-3 py-2"><i class="fa-solid fa-check me-1"></i> Available</span>
+                            <span class="badge bg-success px-3 py-2"><i class="fa-solid fa-check me-1"></i> Available</span>
                         {% else %}
-                        <span class="badge bg-danger px-3 py-2"><i class="fa-solid fa-clock me-1"></i> Currently Let Out</span>
+                            <span class="badge bg-danger px-3 py-2"><i class="fa-solid fa-clock me-1"></i> Currently Let Out</span>
                         {% endif %}
                         </div>
                     </div>
 
                     {% if tool.is_available %}
-                        <form method="POST">
-                            {% csrf_token %}
-                            <div class="mb-3">
-                                <label for="borrow_date" class="form-label fw-bold">Select Collection Date</label>
-                                <input type="date" class="form-control" id="borrow_date" name="borrow_date" required>
-                                <div id="date-error" class="text-danger small fw-bold mt-1 d-none">
+                        {% if user.is_authenticated %}
+                            <form method="POST">
+                                {% csrf_token %}
+                                <div class="mb-3">
+                                    <label for="borrow_date" class="form-label fw-bold">Select Collection Date</label>
+                                    <input type="date" class="form-control" id="borrow_date" name="borrow_date" required>
+                                    <div id="date-error" class="text-danger small fw-bold mt-1 d-none">
                                         <i class="fa-solid fa-circle-exclamation"></i> Please choose a date within the next 5 days.
+                                    </div>
+                                    <div class="form-text">Choose a date within the next 5 days.</div>
                                 </div>
-                                <div class="form-text">Choose a date within the next 5 days.</div>
+                                <button type="submit" class="btn btn-outline-light w-100 bg-dark py-2">
+                                    <i class="fa-solid fa-shield-halved text-light me-2"></i>Pay & Confirm
+                                </button>
+                            </form>
+                        {% else %}
+                            <div class="text-center py-3">
+                                <p class="text-muted mb-3">Please log in to borrow this tool.</p>
+                                <a href="{% url 'login' %}" class="btn btn-outline-light w-100 mb-2 text-white">Login to Borrow</a>
+                                <p class="small text-muted mt-2">New here? <a href="{% url 'register' %}" class="text-orange">Create an account</a></p>
                             </div>
-                            <button type="submit" class="btn btn-borrow btn-lg w-100">Pay & Confirm</button>
-                        </form>
+                        {% endif %}
                     {% else %}
                         <div class="alert alert-secondary text-center py-4">
                             <i class="fa-solid fa-clock-rotate-left fa-2xl mb-3 d-block text-muted"></i>
@@ -95,5 +109,4 @@
 </div>
 
 <script src="{% static 'js/script.js' %}"></script>
-
 {% endblock %}
