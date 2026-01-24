@@ -7,12 +7,13 @@ from datetime import timedelta
 from .models import Tool, Borrowing
 from django.contrib import messages
 from django.db.models import Q
+import stripe
+from django.conf import settings
 
 def all_tools(request):
     """ 
     A view to show all tools, including sorting, search queries, and pagination.
     """
-    # Order by newest first for better UX
     tools_list = Tool.objects.all().order_by('-id') 
     query = request.GET.get('q')
 
@@ -22,7 +23,6 @@ def all_tools(request):
             Q(category__name__icontains=query)
         )
 
-    # Show 6 tools per page
     paginator = Paginator(tools_list, 6) 
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
@@ -33,39 +33,41 @@ def all_tools(request):
     }
     return render(request, 'tools/tools.html', context)
 
-class ToolDetailView(DetailView):
-    """
-    Renders a detailed view for a specific tool instance,
-    including its description, image, and availability.
-    """
-    model = Tool
-    template_name = 'tools/tool_detail.html'
-    context_object_name = 'tool'
+def tool_detail(request, pk):
+    tool = get_object_or_404(Tool, pk=pk)
+    stripe.api_key = settings.STRIPE_SECRET_KEY
 
-@login_required
-def borrow_tool(request, tool_id):
-    """
-    Processes a borrowing request for a specific tool.
-    Checks availability, creates a Borrowing record for the current user,
-    sets a 7-day return date, and marks the tool as unavailable.
-    """
-    tool = get_object_or_404(Tool, id=tool_id)
-    
-    if tool.is_available:
-        return_date = timezone.now().date() + timedelta(days=7)
-        
-        Borrowing.objects.create(
-            user=request.user,
-            tool=tool,
-            return_date=return_date
-        )
-        
-        # This is the part that makes the database "care"
-        tool.is_available = False
-        tool.save()
-        messages.success(request, f'Success! You have borrowed {tool.name}.')
-        
-    return redirect('tool_list')
+    if request.method == "POST":
+        selected_date_str = request.POST.get('borrow_date')
+        if selected_date_str:
+            total_price = tool.price_per_day * 7
+            stripe_total = int(total_price * 100) 
+
+            request.session['pending_borrow_date'] = selected_date_str
+            
+            try:
+                checkout_session = stripe.checkout.Session.create(
+                    payment_method_types=['card'],
+                    line_items=[{
+                        'price_data': {
+                            'currency': 'gbp',
+                            'unit_amount': stripe_total,
+                            'product_data': {
+                                'name': f"{tool.name} (7-Day Rental)",
+                                'description': f"Collection Date: {selected_date_str}",
+                            },
+                        },
+                        'quantity': 1,
+                    }],
+                    mode='payment',
+                    success_url=request.build_absolute_uri(f'/tools/payment-success/{tool.id}/'),
+                    cancel_url=request.build_absolute_uri(f'/tools/{tool.id}/'),
+                )
+                return redirect(checkout_session.url, code=303)
+            except Exception as e:
+                messages.error(request, "Stripe connection failed. Please try again.")
+
+    return render(request, 'tools/tool_detail.html', {'tool': tool})
 
 @login_required
 def return_tool(request, borrowing_id):
@@ -74,12 +76,8 @@ def return_tool(request, borrowing_id):
     and makes the tool available for others to borrow again.
     """
     borrowing = get_object_or_404(Borrowing, id=borrowing_id, user=request.user)
-    
-    # Change status to pending review
     borrowing.status = 'pending'
     borrowing.save()
-    
-    # Note: We do NOT set tool.is_available = True yet!
     
     messages.info(request, f'Thank you. {borrowing.tool.name} is now awaiting admin review.')
     return redirect('profile')
@@ -87,24 +85,19 @@ def return_tool(request, borrowing_id):
 @login_required
 def resolve_dispute(request, borrowing_id):
     """
-    Handles the user's response to a dispute. Captures their notes,
-    updates the status to pending, and sends it back to the admin.
+    Handles the user's response to a dispute.
     """
     borrowing = get_object_or_404(Borrowing, id=borrowing_id, user=request.user)
     
     if request.method == 'POST' and borrowing.status == 'disputed':
         user_msg = request.POST.get('user_notes')
-        
-        # Update the record with the user's explanation
         borrowing.user_notes = user_msg
-        borrowing.status = 'pending'  # Move back to admin's "to-do" list
+        borrowing.status = 'pending'
         borrowing.save()
-        
         messages.success(request, f"Your resolution note for {borrowing.tool.name} has been sent to the admin.")
     
     return redirect('profile')
 
-# Error Handlers
 def error_404(request, exception):
     """ Handles 404 - Page Not Found """
     context = {

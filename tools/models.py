@@ -35,6 +35,8 @@ class Tool(models.Model):
     image = models.ImageField(null=True, blank=True)
     is_available = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    collection_date = models.DateField(null=True, blank=True)
+    available_back_on = models.DateField(null=True, blank=True)
 
     def __str__(self):
         return self.name

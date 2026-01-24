@@ -1,53 +1,99 @@
 {% extends 'base.html' %}
-{% load static %}
 {% block content %}
-<div class="container mt-5">
+{% load static %}
+<div class="container mt-5 pt-4 mb-5">
     <div class="row">
-        <div class="col-md-6">
-            {% if tool.image %}
-                <img src="{{ tool.image.url }}" class="img-fluid rounded" alt="{{ tool.name }}">
-            {% else %}
-                <img src="https://via.placeholder.com/500" class="img-fluid rounded" alt="No image available">
-            {% endif %}
-        </div>
-
-        <div class="col-md-6">
-            <h1>{{ tool.name }}</h1>
-            <hr>
-            <p class="lead">{{ tool.description }}</p>
-            
-            <div class="mt-4">
-                <h4>Price: £{{ tool.price_per_day }} / day</h4>
-                <p><strong>Category:</strong> {{ tool.category }}</p>
+        <div class="col-lg-7">
+            <div class="tool-image-container shadow-sm rounded bg-white p-3 text-center">
+                {% if tool.image %}
+                    <img src="{{ tool.image.url }}" class="img-fluid main-tool-img" alt="{{ tool.name }}">
+                {% else %}
+                    <img src="/static/images/default-tool.png" class="img-fluid main-tool-img" alt="Default Tool Image">
+                {% endif %}
             </div>
 
-            <div class="mt-3">
-                <a href="{% url 'tool_list' %}" class="btn btn-outline-secondary">Back to Hub</a>
-                
-                {% if tool.is_available %}
-                    {% if user.is_authenticated %}
-                        <a href="{% url 'create_checkout_session' tool.id %}" 
-                            class="btn btn-success btn-borrow" 
-                            data-tool-name="{{ tool.name }}">
-                            Pay & Confirm Borrowing
-                        </a>
-                    {% else %}
-                        <a href="{% url 'login' %}" class="btn btn-warning">Login to Borrow</a>
-                    {% endif %}
-                {% else %}
-                    {% with last_borrow=tool.borrows.last %}
-                        {% if last_borrow.status == 'pending' %}
-                            <button class="btn btn-info text-white" disabled>Awaiting Inspection</button>
-                        {% elif last_borrow.status == 'disputed' %}
-                            <button class="btn btn-danger" disabled>Under Maintenance</button>
+            <div class="tool-info-tabs mt-4">
+                <ul class="nav nav-tabs" id="toolTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active font-oswald" id="desc-tab" data-bs-toggle="tab" data-bs-target="#description" type="button" role="tab">Overview</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link font-oswald" id="safety-tab" data-bs-toggle="tab" data-bs-target="#safety" type="button" role="tab">Safety Guidelines</button>
+                    </li>
+                </ul>
+                <div class="tab-content p-4 border border-top-0 bg-white rounded-bottom shadow-sm">
+                    <div class="tab-pane fade show active" id="description" role="tabpanel">
+                        <h5 class="fw-bold mb-3">About this Tool</h5>
+                        <div class="tool-description-text">
+                            {{ tool.description|linebreaks }}
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="safety" role="tabpanel">
+                        <h5 class="fw-bold mb-3 text-danger"><i class="fa-solid fa-triangle-exclamation me-2"></i>Safety First</h5>
+                        <ul class="list-unstyled">
+                            <li class="mb-2"><i class="fa-solid fa-shield-halved me-2 text-primary"></i> Always wear appropriate PPE.</li>
+                            <li class="mb-2"><i class="fa-solid fa-plug-circle-exclamation me-2 text-primary"></i> Check cables for damage before use.</li>
+                            <li class="mb-2"><i class="fa-solid fa-circle-info me-2 text-primary"></i> If unsure of operation, consult the manual or Hub staff.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card borrow-card shadow-lg sticky-top" style="top: 100px; z-index: 10;">
+                <div class="card-header bg-dark text-light p-3">
+                    <h3 class="mb-0 h4 font-oswald">{{ tool.name }}</h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="price-display mb-4">
+                        <span class="h2 fw-bold text-orange">£{{ tool.price_per_day }}</span>
+                        <span class="text-muted">/ per day</span>
+                        <div class="tool-badges mt-3 d-flex justify-content-left gap-2">
+                        {% if tool.is_available %}
+                        <span class="badge bg-success px-3 py-2"><i class="fa-solid fa-check me-1"></i> Available</span>
                         {% else %}
-                            <button class="btn btn-secondary" disabled>Currently on Loan</button>
+                        <span class="badge bg-danger px-3 py-2"><i class="fa-solid fa-clock me-1"></i> Currently Let Out</span>
                         {% endif %}
-                    {% endwith %}
-                {% endif %}
+                        </div>
+                    </div>
+
+                    {% if tool.is_available %}
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label for="borrow_date" class="form-label fw-bold">Select Collection Date</label>
+                                <input type="date" class="form-control" id="borrow_date" name="borrow_date" required>
+                                <div id="date-error" class="text-danger small fw-bold mt-1 d-none">
+                                        <i class="fa-solid fa-circle-exclamation"></i> Please choose a date within the next 5 days.
+                                </div>
+                                <div class="form-text">Choose a date within the next 5 days.</div>
+                            </div>
+                            <button type="submit" class="btn btn-borrow btn-lg w-100">Pay & Confirm</button>
+                        </form>
+                    {% else %}
+                        <div class="alert alert-secondary text-center py-4">
+                            <i class="fa-solid fa-clock-rotate-left fa-2xl mb-3 d-block text-muted"></i>
+                            <h5 class="fw-bold">Currently Rented</h5>
+                            <p class="small text-muted mb-0">Expected back on:</p>
+                            <p class="fw-bold text-dark mt-1 h5">
+                                {{ tool.available_back_on|date:"D d M" }}
+                            </p>
+                        </div>
+                    {% endif %}
+
+                    <hr class="my-4">
+                </div>
+                <div class="card-footer bg-white border-0 text-center pb-4">
+                    <a href="{% url 'tool_list' %}" class="text-decoration-none text-muted fw-bold">
+                        <i class="fa-solid fa-chevron-left me-1"></i> Back to Tool Library
+                    </a>
+                </div>
             </div>
         </div>
     </div>
 </div>
-<script src="{% static 'checkout/js/checkout.js' %}"></script>
+
+<script src="{% static 'js/script.js' %}"></script>
+
 {% endblock %}
