@@ -64,7 +64,7 @@
 
                     {% if tool.is_available %}
                         {% if user.is_authenticated %}
-                            <form method="POST">
+                            <form method="POST" action="{% url 'create_checkout_session' tool.id %}">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label for="borrow_date" class="form-label fw-bold">Select Collection Date</label>
@@ -87,7 +87,6 @@
                         {% endif %}
                     {% else %}
                         <div class="alert alert-secondary text-center py-4">
-                            <i class="fa-solid fa-clock-rotate-left fa-2xl mb-3 d-block text-muted"></i>
                             <h5 class="fw-bold">Currently Rented</h5>
                             <p class="small text-muted mb-0">Expected back on:</p>
                             <p class="fw-bold text-dark mt-1 h5">

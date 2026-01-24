@@ -350,6 +350,34 @@ btn-borrow, btn-lg {
     transition: background-color 0.2s;
 }
 
+/* Profile Page Styling */
+
+.border-orange {
+    border-color: var(--brand-orange) !important;
+}
+
+.bg-orange {
+    background-color: var(--brand-orange) !important;
+}
+
+.btn-orange {
+    background-color: var(--brand-orange);
+    color: white;
+    border: none;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: 0.3s ease;
+}
+
+.btn-orange:hover {
+    background-color: var(--brand-orange-hover);
+    color: white;
+}
+
+.bg-success-soft {
+    background-color: #e8f5e9;
+}
+
 
 /* Auth styling */
 

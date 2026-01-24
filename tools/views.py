@@ -9,6 +9,7 @@ from django.contrib import messages
 from django.db.models import Q
 import stripe
 from django.conf import settings
+from checkout.views import create_checkout_session, payment_success, payment_cancel, stripe_webhook
 
 def all_tools(request):
     """ 
@@ -82,21 +83,22 @@ def return_tool(request, borrowing_id):
     messages.info(request, f'Thank you. {borrowing.tool.name} is now awaiting admin review.')
     return redirect('profile')
 
-@login_required
 def resolve_dispute(request, borrowing_id):
-    """
-    Handles the user's response to a dispute.
-    """
-    borrowing = get_object_or_404(Borrowing, id=borrowing_id, user=request.user)
-    
-    if request.method == 'POST' and borrowing.status == 'disputed':
-        user_msg = request.POST.get('user_notes')
-        borrowing.user_notes = user_msg
-        borrowing.status = 'pending'
-        borrowing.save()
-        messages.success(request, f"Your resolution note for {borrowing.tool.name} has been sent to the admin.")
-    
-    return redirect('profile')
+    borrowing = get_object_or_404(Borrowing, id=borrowing_id)
+
+    if request.method == 'POST':
+        user_reason = request.POST.get('reason')
+        
+        if user_reason:
+            borrowing.status = 'pending'
+            borrowing.user_notes = user_reason 
+            borrowing.save()
+            
+            messages.success(request, "Your response has been submitted for review.")
+        else:
+            messages.error(request, "Please provide a reason for the resolution.")
+
+    return redirect('profile_view')
 
 def error_404(request, exception):
     """ Handles 404 - Page Not Found """

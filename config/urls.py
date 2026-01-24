@@ -29,6 +29,7 @@ urlpatterns = [
     path('register/', account_views.register, name='register'),
     path('profile/', account_views.profile_view, name='profile'),
     path('checkout/', include('checkout.urls')),
+    path('accounts/', include('accounts.urls')),
 ]
 
 handler404 = 'tools.views.error_404'

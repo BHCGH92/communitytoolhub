@@ -14,20 +14,16 @@ from django.contrib.auth.models import User
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 def create_checkout_session(request, tool_id):
-    """ Creates a Stripe session for a specific tool with a 7-day minimum """
     tool = get_object_or_404(Tool, id=tool_id)
-    
-    if not tool.is_available:
-        messages.error(request, "Sorry, this tool was just grabbed by someone else!")
-        return redirect('tool_detail', pk=tool.id)
+    selected_date = request.POST.get('borrow_date')
 
     try:
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
-            # METADATA: Crucial for the webhook to identify the user and tool
             metadata={
                 'tool_id': tool.id,
-                'user_id': request.user.id
+                'user_id': request.user.id,
+                'borrow_date': selected_date
             },
             line_items=[{
                 'price_data': {
@@ -45,7 +41,7 @@ def create_checkout_session(request, tool_id):
         )
         return redirect(session.url, code=303)
     except Exception as e:
-        messages.error(request, "Payment gateway error. Please try again.")
+        messages.error(request, f"Payment error: {e}")
         return redirect('tool_detail', pk=tool.id)
 
 def payment_success(request):

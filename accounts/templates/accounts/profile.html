@@ -1,89 +1,174 @@
 {% extends 'base.html' %}
-
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-5 pt-4">
     <div class="row">
-        <div class="col-md-4">
-            <div class="card shadow-sm mb-4">
-                <div class="card-body text-center">
-                    <h3 class="card-title">{{ user.username }}</h3>
-                    <p class="text-muted">{{ user.email }}</p>
+        <div class="col-lg-3 mb-4">
+            <div class="card shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <h4 class="font-oswald text-uppercase mb-1">{{ user.username }}</h4>
+                    <p class="text-muted small">{{ user.email }}</p>
                     <hr>
-                    <p><strong>Member Since:</strong> {{ user.date_joined|date:"M Y" }}</p>
+                    <p class="small mb-1 text-muted">MEMBER SINCE</p>
+                    <p class="fw-bold">{{ user.date_joined|date:"M Y" }}</p>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-8">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <h2>My Borrowed Tools</h2>
-                <form method="GET" class="d-flex">
-                    <input type="text" name="pq" class="form-control form-control-sm me-2" placeholder="Search my tools..." value="{{ request.GET.pq|default:'' }}">
-                    <button class="btn btn-sm btn-outline-primary" type="submit">Filter</button>
-                </form>
-            </div>
-
-            <div class="card shadow-sm">
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3 border-0">
+                    <div class="row align-items-center">
+                        <div class="col-md-5 mb-3 mb-md-0">
+                            <h2 class="font-oswald text-uppercase mb-0 h4">My Borrowed Tools</h2>
+                        </div>
+                        <div class="col-md-7">
+                            <form method="GET" class="row g-2">
+                                <div class="col-12 col-md-7">
+                                    <input class="form-control" type="search" name="pq" placeholder="Search..." value="{{ search_term|default:'' }}">
+                                </div>
+                                <div class="col-12 col-md-5">
+                                    <select name="status" class="form-select" onchange="this.form.submit()">
+                                        <option value="all" {% if current_status == 'all' or not current_status %}selected{% endif %}>All Status</option>
+                                        <option value="active" {% if current_status == 'active' %}selected{% endif %}>Active</option>
+                                        <option value="pending" {% if current_status == 'pending' %}selected{% endif %}>Awaiting Review</option>
+                                        <option value="returned" {% if current_status == 'returned' %}selected{% endif %}>Returned</option>
+                                        <option value="disputed" {% if current_status == 'disputed' %}selected{% endif %}>Disputed</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="d-none">Filter</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="table-responsive">
-                    <table class="table table-hover mb-0">
-                        <thead class="table-dark">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-dark text-white text-nowrap">
                             <tr>
-                                <th>Tool</th>
-                                <th>Due Date</th>
-                                <th>Status / Action</th>
+                                <th class="ps-3 font-oswald text-uppercase small">Tool</th>
+                                <th class="font-oswald text-uppercase small">Collected</th>
+                                <th class="font-oswald text-uppercase small">Due Date</th>
+                                <th class="text-center font-oswald text-uppercase small">Status / Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            {% for borrow in my_borrows %}
+                            {% for borrow in borrowings %}
                             <tr>
-                                <td><strong>{{ borrow.tool.name }}</strong></td>
-                                <td>{{ borrow.return_date }}</td>
-                                <td>
-                                    {% if borrow.status == 'active' %}
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="badge bg-warning text-dark">On Loan</span>
-                                            <a href="{% url 'return_tool' borrow.id %}" class="btn btn-sm btn-outline-primary">Return</a>
-                                        </div>
-                                    {% elif borrow.status == 'pending' %}
-                                        <span class="badge bg-info text-dark">Awaiting Review</span>
-                                    {% elif borrow.status == 'returned' %}
-                                        <span class="badge bg-success">Returned</span>
+                                <td class="ps-3 fw-bold">{{ borrow.tool.name }}</td>
+                                <td class="text-muted small">{{ borrow.borrowed_date|date:"d M, Y" }}</td>
+                                <td class="text-muted small">{{ borrow.return_date|date:"d M, Y" }}</td>
+                                <td class="text-center">
+                                    {% if borrow.status == 'returned' %}
+                                        <span class="badge bg-success px-3 py-2 rounded-pill">
+                                            <i class="fa-solid fa-check-circle me-1"></i> Returned
+                                        </span>
+                                    {% elif borrow.status == 'pending' or borrow.status == 'awaiting_review' %}
+                                        <span class="badge bg-info px-3 py-2 rounded-pill text-dark">
+                                            <i class="fa-solid fa-magnifying-glass me-1"></i> Awaiting Review
+                                        </span>
                                     {% elif borrow.status == 'disputed' %}
-                                        <div class="p-2 border border-danger rounded bg-light">
-                                            <span class="badge bg-danger mb-2">Disputed</span>
-                                            
-                                            {% if borrow.admin_notes %}
-                                                <div class="alert alert-secondary py-1 px-2 small mb-2">
-                                                    <strong>Admin Note:</strong> {{ borrow.admin_notes }}
-                                                </div>
-                                            {% endif %}
+                                        <div class="d-flex flex-column align-items-center gap-2">
+                                            <span class="badge bg-danger px-3 py-2 rounded-pill">
+                                                <i class="fa-solid fa-triangle-exclamation me-1"></i> Disputed
+                                            </span>
+                                            <button type="button" class="btn btn-sm btn-link text-danger fw-bold p-0 text-decoration-none" 
+                                                    data-bs-toggle="modal" data-bs-target="#resolveModal{{ borrow.id }}" style="font-size: 0.75rem;">
+                                                Resolve Issue
+                                            </button>
+                                        </div>
 
-                                            {% if borrow.user_notes %}
-                                                <div class="alert alert-info py-1 px-2 small mb-2">
-                                                    <strong>Your last note:</strong> {{ borrow.user_notes }}
-                                                </div>
-                                            {% endif %}
+                                        <div class="modal fade" id="resolveModal{{ borrow.id }}" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog modal-dialog-centered">
+                                                <div class="modal-content border-0 shadow">
+                                                    <div class="modal-header bg-danger text-white">
+                                                        <h5 class="modal-title font-oswald text-uppercase small">Resolve Dispute: {{ borrow.tool.name }}</h5>
+                                                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                    </div>
+                                                    <form method="POST" action="{% url 'resolve_dispute' borrow.id %}">
+                                                        {% csrf_token %}
+                                                        <div class="modal-body text-start">
+                                                            <div class="mb-3 p-3 bg-light border-start border-danger border-4 rounded">
+                                                                <label class="fw-bold small text-danger d-block mb-1">
+                                                                    <i class="fa-solid fa-user-shield"></i> ADMIN NOTES:
+                                                                </label>
+                                                                <p class="mb-0 small fst-italic">
+                                                                    {% if borrow.admin_notes %}
+                                                                        "{{ borrow.admin_notes }}"
+                                                                    {% else %}
+                                                                        <span class="text-muted">No specific notes provided by the admin.</span>
+                                                                    {% endif %}
+                                                                </p>
+                                                            </div>
 
-                                            <form action="{% url 'resolve_dispute' borrow.id %}" method="POST">
-                                                {% csrf_token %}
-                                                <div class="mb-2">
-                                                    <textarea name="user_notes" class="form-control form-control-sm" rows="2" 
-                                                              placeholder="Explain how you resolved this..." required></textarea>
+                                                            <p class="text-muted small">Please provide your response or any additional information to resolve this dispute.</p>
+                                                            <div class="mb-3">
+                                                                <label for="reason{{ borrow.id }}" class="form-label fw-bold small">Your Response</label>
+                                                                <textarea class="form-control" id="reason{{ borrow.id }}" name="reason" rows="4" required placeholder="Describe the issue or resolution..."></textarea>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer bg-light">
+                                                            <button type="button" class="btn btn-sm btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                                                            <button type="submit" class="btn btn-sm btn-danger rounded-pill px-3">Submit Reason</button>
+                                                        </div>
+                                                    </form>
                                                 </div>
-                                                <button type="submit" class="btn btn-sm btn-success w-100">Send for Re-review</button>
-                                            </form>
+                                            </div>
+                                        </div>
+                                    {% elif borrow.status == 'active' and borrow.return_date < today %}
+                                        <div class="d-flex flex-column align-items-center gap-2">
+                                            <span class="badge bg-dark border border-danger text-danger px-3 py-2 rounded-pill">
+                                                <i class="fa-solid fa-calendar-xmark me-1"></i> OVERDUE
+                                            </span>
+                                            <a href="{% url 'return_tool' borrow.id %}" class="btn btn-sm btn-danger rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem;">Return Now</a>
+                                        </div>
+                                    {% else %}
+                                        <div class="d-flex flex-column align-items-center gap-2">
+                                            <span class="badge bg-orange px-3 py-2 rounded-pill text-white">
+                                                <i class="fa-solid fa-clock me-1"></i> Active
+                                            </span>
+                                            <a href="{% url 'return_tool' borrow.id %}" class="btn btn-sm btn-outline-dark rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem;">Return</a>
                                         </div>
                                     {% endif %}
                                 </td>
                             </tr>
                             {% empty %}
                             <tr>
-                                <td colspan="3" class="text-center py-4 text-muted">No borrowings found.</td>
+                                <td colspan="4" class="text-center py-4 text-muted">No tools found matching your search.</td>
                             </tr>
                             {% endfor %}
                         </tbody>
                     </table>
                 </div>
+
+                {% if borrowings.has_other_pages %}
+                <div class="card-footer bg-white border-0 py-3">
+                    <nav aria-label="Page navigation">
+                        <ul class="pagination justify-content-center mb-0">
+                            {% if borrowings.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link text-dark shadow-none border-1" href="?page={{ borrowings.previous_page_number }}{% if search_term %}&pq={{ search_term }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}">
+                                        <i class="fa-solid fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+
+                            <li class="page-item disabled">
+                                <span class="page-link text-white px-4 fw-bold shadow-none" style="background-color: #fd7e14; border-color: #fd7e14;">
+                                    Page {{ borrowings.number }} of {{ borrowings.paginator.num_pages }}
+                                </span>
+                            </li>
+
+                            {% if borrowings.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link text-dark shadow-none border-1" href="?page={{ borrowings.next_page_number }}{% if search_term %}&pq={{ search_term }}{% endif %}{% if current_status %}&status={{ current_status }}{% endif %}">
+                                        <i class="fa-solid fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>

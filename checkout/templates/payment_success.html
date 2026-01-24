@@ -4,7 +4,7 @@
     <div class="card shadow p-5">
         <h1 class="text-success">Thank You!</h1>
         <p class="lead">Your payment for <strong>{{ tool.name }}</strong> was successful.</p>
-        <p>The tool is now reserved for you for the next 7 days.</p>
+        <p>The tool is now reserved for 7 days after the collection date.</p>
         <div class="mt-4">
             <a href="{% url 'profile' %}" class="btn btn-primary">View My Borrowings</a>
             <a href="{% url 'tool_list' %}" class="btn btn-outline-secondary">Back to Library</a>
