@@ -35,6 +35,8 @@ INSTALLED_APPS = [
     'tools',
     'checkout',
     'borrowing',
+    'crispy_forms',
+    'crispy_bootstrap5',
 ]
 
 MIDDLEWARE = [
@@ -169,3 +171,6 @@ LOGIN_REDIRECT_URL = 'tool_list'
 LOGOUT_REDIRECT_URL = 'tool_list'
 
 STRIPE_WEBHOOK_SECRET = os.getenv('STRIPE_WEBHOOK_SECRET')
+
+CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
+CRISPY_TEMPLATE_PACK = "bootstrap5"

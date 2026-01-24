@@ -58,6 +58,14 @@ footer, p {
     font-family: 'Oswald', sans-serif;
 }
 
+.darker-text {
+    color: var(--dark-charcoal);
+}
+
+.lighter-text {
+    color: var(--light-gray);
+}
+
 /* Navbar Styles */
 
 nav.navbar.custom-navbar {
@@ -319,6 +327,48 @@ nav.navbar.custom-navbar {
 }
 
 
+/* Auth styling */
+
+/* 1. Target the 'Password confirmation' and rules specifically */
+.auth-card .text-muted, 
+.auth-card .form-text, 
+.auth-card small,
+.auth-card .helptext {
+    color: #212529 !important; /* High-contrast Charcoal */
+    opacity: 1 !important;     /* Removes the transparency causing the 'white' look */
+    display: block !important;
+    font-weight: 600 !important;
+    margin-top: 5px;
+    font-size: 0.85rem !important;
+}
+
+/* 2. Target the RED validation errors (e.g., 'Passwords didn't match') */
+.invalid-feedback, 
+.invalid-feedback strong,
+.errorlist li,
+.alert-danger {
+    color: #b71c1c !important; /* Deep "Danger" Red */
+    opacity: 1 !important;
+    font-weight: 700 !important;
+    display: block !important;
+    margin-top: 8px;
+    font-size: 0.9rem !important;
+}
+
+/* 3. Style the Input Labels (Username, Email, etc.) */
+.auth-card label {
+    color: #1a1a1a !important; /* Solid Black/Charcoal */
+    font-weight: 700 !important;
+    margin-bottom: 5px;
+    display: inline-block;
+}
+
+/* 4. Hide bullet points if they are cluttering the UI */
+.auth-card ul.helptext, 
+.auth-card .form-text ul {
+    display: none !important;
+}
+
 /* Media Queries */
 
 @media (max-width: 767px) {
@@ -333,5 +383,21 @@ nav.navbar.custom-navbar {
 
     .hero-section h1 {
         font-size: 2.2rem;
+    }
+
+    /* Auth styling */
+    .container.d-flex {
+        padding-left: 15px !important;
+        padding-right: 15px !important;
+    }
+
+    .auth-card {
+        width: 100%;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    
+    .card-body {
+        padding: 20px 15px !important;
     }
 }

@@ -6,9 +6,11 @@
         <div class="row align-items-center">
             <div class="col-lg-8 mx-auto text-center hero-text">
                 <h1 class="display-3 fw-bold text-white">Professional Tools, <span class="text-orange">Shared Pricing.</span></h1>
-                <p class="lead mb-4">Why buy when you can borrow? Access a massive library of power tools for your next project.</p>
+                <p class="lead mb-4 text-white">Why buy when you can borrow? Access a massive library of power tools for your next project.</p>
                 <div class="hero-btns">
+                    {% if not user.is_authenticated %}
                     <a href="{% url 'register' %}" class="btn btn-outline-light btn-lg">Join the Community</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
