@@ -1,17 +1,28 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block content %}
+    <section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mx-auto text-center hero-text">
+                <h1 class="display-3 fw-bold text-white">Professional Tools, <span class="text-orange">Shared Pricing.</span></h1>
+                <p class="lead mb-4">Why buy when you can borrow? Access a massive library of power tools for your next project.</p>
+                <div class="hero-btns">
+                    <a href="{% url 'register' %}" class="btn btn-outline-light btn-lg">Join the Community</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 <div class="container mt-4">
     <div class="row mb-4">
         <div class="col-md-8 mx-auto text-center">
+            <div class="container library-section" style="padding-top: 60px;"></div>
             <h1 class="mb-4">Tool Library</h1>
             
             <form method="GET" action="{% url 'tool_list' %}" class="input-group">
                 <input type="text" name="q" class="form-control" placeholder="Search by name or category..." value="{{ request.GET.q|default:'' }}">
                 <button class="btn btn-primary search-bar-button" type="submit">Search</button>
-                {% if request.GET.q %}
-                    <a href="{% url 'tool_list' %}" class="btn btn-outline-secondary">Clear</a>
-                {% endif %}
             </form>
 
             {% if request.GET.q %}
