@@ -54,7 +54,7 @@
                         <tbody>
                             {% for borrow in borrowings %}
                             <tr>
-                                <td class="ps-3 fw-bold">{{ borrow.tool.name }}</td>
+                                <td class="ps-3">{{ borrow.tool.name }}</td>
                                 <td class="text-muted small">{{ borrow.borrowed_date|date:"d M, Y" }}</td>
                                 <td class="text-muted small">{{ borrow.return_date|date:"d M, Y" }}</td>
                                 <td class="text-center">
