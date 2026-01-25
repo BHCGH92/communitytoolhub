@@ -13,6 +13,7 @@ from django.contrib.auth.models import User
 
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
+
 def create_checkout_session(request, tool_id):
     tool = get_object_or_404(Tool, id=tool_id)
     selected_date = request.POST.get('borrow_date')
@@ -36,7 +37,8 @@ def create_checkout_session(request, tool_id):
                 'quantity': 7,
             }],
             mode='payment',
-            success_url=request.build_absolute_uri(reverse('payment_success')) + f"?tool_id={tool.id}",
+            success_url=request.build_absolute_uri(reverse('payment_success'))
+            + f"?tool_id={tool.id}",
             cancel_url=request.build_absolute_uri(reverse('payment_cancel')),
         )
         return redirect(session.url, code=303)
@@ -44,29 +46,32 @@ def create_checkout_session(request, tool_id):
         messages.error(request, f"Payment error: {e}")
         return redirect('tool_detail', pk=tool.id)
 
+
 def payment_success(request):
     tool_id = request.GET.get('tool_id')
     tool = get_object_or_404(Tool, id=tool_id)
-    
+
     # GUARD Clause: Check if the tool is still actually available
     # We use select_for_update() to 'lock' the row during this check...
     try:
         with transaction.atomic():
             # Refresh the tool data from the DB to be 100% sure of its status
             tool_to_lock = Tool.objects.select_for_update().get(id=tool.id)
-            
+
             if not tool_to_lock.is_available:
                 # Check if the webhook already processed this
                 already_borrowed = Borrowing.objects.filter(
-                    tool=tool_to_lock, 
-                    user=request.user, 
+                    tool=tool_to_lock,
+                    user=request.user,
                     status='active'
                 ).exists()
-                
-                if already_borrowed:
-                    return render(request, 'payment_success.html', {'tool': tool})
 
-                messages.error(request, "Too late! Someone else finished their payment just before you. Please contact support for a refund.")
+                if already_borrowed:
+                    return render(request, 'payment_success.html',
+                    {'tool': tool})
+
+                messages.error
+                (request, "Too late! Someone else finished their payment just before you. Please contact support for a refund.")
                 return redirect('tool_list')
 
             # 2. SUCCESS PATH: Create the record
@@ -77,7 +82,7 @@ def payment_success(request):
                 return_date=return_date,
                 status='active'
             )
-            
+
             # 3. Mark as unavailable immediately
             tool_to_lock.is_available = False
             tool_to_lock.save()
@@ -85,23 +90,25 @@ def payment_success(request):
     except Exception as e:
         messages.error(request, "A system error occurred. Please contact support.")
         return redirect('tool_list')
-    
+
     messages.success(request, f"Payment Confirmed! {tool.name} is now reserved for you.")
     return render(request, 'payment_success.html', {'tool': tool})
+
 
 def payment_cancel(request):
     """ Handles cases where the user cancels the payment process """
     messages.warning(request, "Payment cancelled. The tool has not been borrowed.")
     return render(request, 'payment_cancel.html')
 
+
 @csrf_exempt
 def stripe_webhook(request):
     """
-    Handles background payment confirmation. 
+    Handles background payment confirmation.
     """
     payload = request.body
     sig_header = request.META.get('HTTP_STRIPE_SIGNATURE')
-    endpoint_secret = settings.STRIPE_WEBHOOK_SECRET 
+    endpoint_secret = settings.STRIPE_WEBHOOK_SECRET
 
     try:
         event = stripe.Webhook.construct_event(
@@ -112,27 +119,28 @@ def stripe_webhook(request):
 
     if event['type'] == 'checkout.session.completed':
         session = event['data']['object']
-        
+
         # Extract metadata
         tool_id = session.get('metadata', {}).get('tool_id')
         user_id = session.get('metadata', {}).get('user_id')
-        
+
         if tool_id and user_id:
             finalize_checkout(tool_id, user_id)
 
     return HttpResponse(status=200)
+
 
 def finalize_checkout(tool_id, user_id):
     try:
         # Explicitly convert to int to prevent lookup crashes
         u_id = int(user_id)
         t_id = int(tool_id)
-        
+
         user = User.objects.get(id=u_id)
-        
+
         with transaction.atomic():
             tool = Tool.objects.select_for_update().get(id=t_id)
-            
+
             if tool.is_available:
                 return_date = timezone.now().date() + timedelta(days=7)
                 Borrowing.objects.get_or_create(
