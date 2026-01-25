@@ -3,6 +3,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from .models import UserProfile
 
+
 class RegistrationForm(UserCreationForm):
     """
     Form to register a new user and capture initial profile data.

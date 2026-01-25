@@ -7,6 +7,7 @@ from tools.models import Borrowing
 from django.utils import timezone
 from django.core.paginator import Paginator
 
+
 def register(request):
     """View to handle user registration."""
     if request.method == 'POST':
@@ -14,18 +15,21 @@ def register(request):
         if form.is_valid():
             form.save()
             username = form.cleaned_data.get('username')
-            messages.success(request, f'Account created for {username}! You can now login.')
+            messages.success
+            (request, f'Account created for {username}! You can now login.')
             return redirect('login')
     else:
         form = RegistrationForm()
     return render(request, 'accounts/register.html', {'form': form})
 
+
 @login_required
 def profile_view(request):
-    """View to display the user's profile with search, status filters, and pagination."""
+    """View to display the user's profile with
+    search, status filters, and pagination."""
     query = request.GET.get('pq')
     status_filter = request.GET.get('status')
-    
+
     my_borrows = Borrowing.objects.filter(user=request.user).order_by('-id')
 
     if query:
@@ -33,7 +37,7 @@ def profile_view(request):
     if status_filter and status_filter != 'all':
         my_borrows = my_borrows.filter(status=status_filter)
 
-    paginator = Paginator(my_borrows, 10) 
+    paginator = Paginator(my_borrows, 10)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
 
