@@ -17,7 +17,6 @@ class TestToolModels(TestCase):
         # Assess functionality of custom models
         tool = Tool.objects.create(
             name='Drill',
-            owner=self.user,
             category=self.category,
             price_per_day=10.00
         )
@@ -25,4 +24,4 @@ class TestToolModels(TestCase):
 
     def test_category_friendly_name(self):
         # Verify custom logic for friendly names
-        self.assertEqual(self.category.get_friendly_name(), 'Power Tools')
+        self.assertEqual(self.category.friendly_name, 'Power Tools')

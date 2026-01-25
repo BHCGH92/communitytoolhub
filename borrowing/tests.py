@@ -14,7 +14,6 @@ class RentalModelTest(TestCase):
         self.category = Category.objects.create(name='Power Tools')
         self.tool = Tool.objects.create(
             name='Hammer Drill',
-            owner=self.user,
             category=self.category,
             price_per_day=15.00,
             is_available=True
