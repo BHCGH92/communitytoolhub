@@ -4,11 +4,13 @@ from tools.models import Tool, Category
 from .models import Rental
 from datetime import date, timedelta
 
+
 class RentalModelTest(TestCase):
     """Test suite for the Rental model relationships and logic"""
     def setUp(self):
         # Create a user, category, and tool for testing
-        self.user = User.objects.create_user(username='borrower', password='password123')
+        self.user = User.objects.create_user(username='borrower',
+        password='password123')
         self.category = Category.objects.create(name='Power Tools')
         self.tool = Tool.objects.create(
             name='Hammer Drill',
