@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import Category, Tool, Borrowing
 
+
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
     """
@@ -10,6 +11,7 @@ class CategoryAdmin(admin.ModelAdmin):
         'friendly_name',
         'name',
     )
+
 
 @admin.register(Tool)
 class ToolAdmin(admin.ModelAdmin):
@@ -28,6 +30,7 @@ class ToolAdmin(admin.ModelAdmin):
     # Adds a search bar for better User experience
     search_fields = ('name', 'description')
 
+
 @admin.register(Borrowing)
 class BorrowingAdmin(admin.ModelAdmin):
     """
@@ -37,13 +40,15 @@ class BorrowingAdmin(admin.ModelAdmin):
     list_filter = ('status',)
 
     def save_model(self, request, obj, form, change):
-        # If the admin sets the status to 'returned', automatically make the tool available
+        # If the admin sets the status to 'returned',
+        # automatically make the tool available
         if obj.status == 'returned':
             obj.tool.is_available = True
             obj.tool.save()
-        # If the admin sets it to 'disputed' or 'active', ensure it's unavailable
+        # If the admin sets it to 'disputed' or
+        # 'active', ensure it's unavailable
         elif obj.status in ['active', 'pending', 'disputed']:
             obj.tool.is_available = False
             obj.tool.save()
-            
+
         super().save_model(request, obj, form, change)

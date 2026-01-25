@@ -5,27 +5,29 @@ from django.db.models.signals import post_migrate
 from django.contrib.auth import get_user_model
 from django.dispatch import receiver
 
+
 class Category(models.Model):
     """
     Model representing tool categories for library organization.
     """
     class Meta:
         verbose_name_plural = 'Categories'
-        
+
     name = models.CharField(max_length=254)
     friendly_name = models.CharField(max_length=254, null=True, blank=True)
 
     def __str__(self):
         return self.name
 
+
 class Tool(models.Model):
     """
     Represents an individual tool owned by the Hub.
     """
     category = models.ForeignKey(
-        'Category', 
-        null=True, 
-        blank=True, 
+        'Category',
+        null=True,
+        blank=True,
         on_delete=models.SET_NULL
     )
     # Note: Removed 'owner' to focus on B2C library model
@@ -40,7 +42,8 @@ class Tool(models.Model):
 
     def __str__(self):
         return self.name
-    
+
+
 class Borrowing(models.Model):
     """
     Records the borrowing transaction between a User and a Hub Tool.
@@ -51,17 +54,18 @@ class Borrowing(models.Model):
         ('returned', 'Available'),
         ('disputed', 'Disputed'),
     ]
-    
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='borrows')
-    tool = models.ForeignKey(Tool, on_delete=models.CASCADE, related_name='borrows')
+
+    user = models.ForeignKey (User, on_delete=models.CASCADE, related_name='borrows')
+    tool = models.ForeignKey (Tool, on_delete=models.CASCADE, related_name='borrows')
     borrowed_date = models.DateField(auto_now_add=True)
     return_date = models.DateField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
-    admin_notes = models.TextField(blank=True, null=True) # For feedback/damage notes
-    user_notes = models.TextField(blank=True, null=True) # For user resolved comments
+    status = models.CharField (max_length=20, choices=STATUS_CHOICES, default='active')
+    admin_notes = models.TextField(blank=True, null=True)
+    user_notes = models.TextField (blank=True, null=True)
 
     def __str__(self):
         return f"{self.tool.name} - {self.status}"
+
 
 @receiver(post_migrate)
 def create_superuser(sender, **kwargs):

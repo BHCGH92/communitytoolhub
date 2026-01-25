@@ -2,6 +2,7 @@ from django.test import TestCase
 from .models import Category, Tool
 from django.contrib.auth.models import User
 
+
 class TestToolModels(TestCase):
     """
     Test suite for Tool and Category models.
@@ -15,9 +16,9 @@ class TestToolModels(TestCase):
     def test_tool_string_method_returns_name(self):
         # Assess functionality of custom models
         tool = Tool.objects.create(
-            name='Drill', 
-            owner=self.user, 
-            category=self.category, 
+            name='Drill',
+            owner=self.user,
+            category=self.category,
             price_per_day=10.00
         )
         self.assertEqual(str(tool), 'Drill')
