@@ -36,37 +36,9 @@ def all_tools(request):
 
 def tool_detail(request, pk):
     tool = get_object_or_404(Tool, pk=pk)
-    stripe.api_key = settings.STRIPE_SECRET_KEY
-
+    
     if request.method == "POST":
-        selected_date_str = request.POST.get('borrow_date')
-        if selected_date_str:
-            total_price = tool.price_per_day * 7
-            stripe_total = int(total_price * 100) 
-
-            request.session['pending_borrow_date'] = selected_date_str
-            
-            try:
-                checkout_session = stripe.checkout.Session.create(
-                    payment_method_types=['card'],
-                    line_items=[{
-                        'price_data': {
-                            'currency': 'gbp',
-                            'unit_amount': stripe_total,
-                            'product_data': {
-                                'name': f"{tool.name} (7-Day Rental)",
-                                'description': f"Collection Date: {selected_date_str}",
-                            },
-                        },
-                        'quantity': 1,
-                    }],
-                    mode='payment',
-                    success_url=request.build_absolute_uri(f'/tools/payment-success/{tool.id}/'),
-                    cancel_url=request.build_absolute_uri(f'/tools/{tool.id}/'),
-                )
-                return redirect(checkout_session.url, code=303)
-            except Exception as e:
-                messages.error(request, "Stripe connection failed. Please try again.")
+        return create_checkout_session(request, tool.id)
 
     return render(request, 'tools/tool_detail.html', {'tool': tool})
 
