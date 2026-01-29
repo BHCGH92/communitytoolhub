@@ -64,7 +64,7 @@
 
                     {% if tool.is_available %}
                         {% if user.is_authenticated %}
-                            <form method="POST" action="{% url 'create_checkout_session' tool.id %}">
+                            <form id="checkout-form" method="POST" action="{% url 'create_checkout_session' tool.id %}">
                                 {% csrf_token %}
                                 <div class="mb-3">
                                     <label for="borrow_date" class="form-label fw-bold">Select Collection Date</label>
@@ -74,7 +74,7 @@
                                     </div>
                                     <div class="form-text">Choose a date within the next 5 days.</div>
                                 </div>
-                                <button type="submit" class="btn btn-outline-light w-100 bg-dark py-2">
+                                <button type="submit" class="btn btn-outline-light w-100 bg-dark py-2 btn-borrow">
                                     <i class="fa-solid fa-shield-halved text-light me-2"></i>Pay & Confirm
                                 </button>
                             </form>
@@ -108,4 +108,5 @@
 </div>
 
 <script src="{% static 'js/script.js' %}"></script>
+<script src="{% static 'checkout/js/checkout.js' %}"></script>
 {% endblock %}
