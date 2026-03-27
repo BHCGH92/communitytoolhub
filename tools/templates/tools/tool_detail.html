@@ -64,14 +64,25 @@
 
                     {% if tool.is_available %}
                         {% if user.is_authenticated %}
-                            <form id="checkout-form" method="POST" action="{% url 'create_checkout_session' tool.id %}">
+                            <form id="checkout-form" method="POST">
                                 {% csrf_token %}
                                 <div class="mb-3">
-                                    <label for="borrow_date" class="form-label fw-bold">Select Collection Date</label>
-                                    <input type="date" class="form-control" id="borrow_date" name="borrow_date" required>
-                                    <div id="date-error" class="text-danger small fw-bold mt-1 d-none">
-                                        <i class="fa-solid fa-circle-exclamation"></i> Please choose a date within the next 5 days.
-                                    </div>
+                                    <label for="{{ form.borrow_date.id_for_label }}" class="form-label fw-bold">
+                                        Select Collection Date
+                                    </label>
+                                    {{ form.borrow_date }}
+                                    {% if form.borrow_date.errors %}
+                                        <div class="text-danger small fw-bold mt-1">
+                                            <i class="fa-solid fa-circle-exclamation"></i>
+                                            {{ form.borrow_date.errors|join:", " }}
+                                        </div>
+                                    {% endif %}
+                                    {% if form.non_field_errors %}
+                                        <div class="text-danger small fw-bold mt-1">
+                                            <i class="fa-solid fa-circle-exclamation"></i>
+                                            {{ form.non_field_errors|join:", " }}
+                                        </div>
+                                    {% endif %}
                                     <div class="form-text">Choose a date within the next 5 days.</div>
                                 </div>
                                 <button type="submit" class="btn btn-outline-light w-100 bg-dark py-2 btn-borrow">

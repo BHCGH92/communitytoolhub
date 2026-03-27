@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import timedelta
 from .models import Tool, Borrowing
+from .forms import BorrowingForm
 from django.contrib import messages
 from django.db.models import Q
 import stripe
@@ -40,9 +41,14 @@ def tool_detail(request, pk):
     tool = get_object_or_404(Tool, pk=pk)
 
     if request.method == "POST":
-        return create_checkout_session(request, tool.id)
+        form = BorrowingForm(request.POST, tool=tool, user=request.user)
+        if form.is_valid():
+            return create_checkout_session(request, tool.id)
+        # Form is invalid — re-render with errors
+        return render(request, 'tools/tool_detail.html', {'tool': tool, 'form': form})
 
-    return render(request, 'tools/tool_detail.html', {'tool': tool})
+    form = BorrowingForm(tool=tool, user=request.user)
+    return render(request, 'tools/tool_detail.html', {'tool': tool, 'form': form})
 
 
 @login_required

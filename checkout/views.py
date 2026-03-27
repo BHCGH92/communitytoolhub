@@ -83,8 +83,9 @@ def payment_success(request):
                 status='active'
             )
 
-            # 3. Mark as unavailable immediately
+            # 3. Mark as unavailable and record expected return date
             tool_to_lock.is_available = False
+            tool_to_lock.available_back_on = return_date
             tool_to_lock.save()
 
     except Exception as e:
@@ -150,6 +151,7 @@ def finalize_checkout(tool_id, user_id):
                     defaults={'return_date': return_date}
                 )
                 tool.is_available = False
+                tool.available_back_on = return_date
                 tool.save()
     except Exception as e:
         # This prevents a 500 and lets you see the error in Heroku logs
