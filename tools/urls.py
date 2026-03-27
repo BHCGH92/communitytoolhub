@@ -10,5 +10,6 @@ path('', views.all_tools, name='tool_list'),
     path('payment-cancel/', views.payment_cancel, name='payment_cancel'),
     path('webhook/', views.stripe_webhook, name='stripe_webhook'),
     path('return/<int:borrowing_id>/', views.return_tool, name='return_tool'),
+    path('cancel/<int:borrowing_id>/', views.cancel_borrowing, name='cancel_borrowing'),
     path('resolve/<int:borrowing_id>/', views.resolve_dispute, name='resolve_dispute'),
 ]

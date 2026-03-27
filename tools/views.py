@@ -8,6 +8,7 @@ from .models import Tool, Borrowing
 from .forms import BorrowingForm
 from django.contrib import messages
 from django.db.models import Q
+from django.db import transaction
 import stripe
 from django.conf import settings
 from checkout.views import create_checkout_session, payment_success, payment_cancel, stripe_webhook
@@ -63,6 +64,34 @@ def return_tool(request, borrowing_id):
 
     messages.info(request, f'Thank you. {borrowing.tool.name} is now awaiting admin review.')
     return redirect('profile')
+
+@login_required
+def cancel_borrowing(request, borrowing_id):
+    """
+    Allows a user to cancel an active borrowing on the same day it was created.
+    Deletes the Borrowing record and restores tool availability atomically.
+    """
+    borrowing = get_object_or_404(Borrowing, id=borrowing_id, user=request.user)
+
+    if borrowing.status != 'active':
+        messages.error(request, "Only active borrowings can be cancelled.")
+        return redirect('profile')
+
+    if borrowing.borrowed_date != timezone.now().date():
+        messages.error(request, "Borrowings can only be cancelled on the day they are created.")
+        return redirect('profile')
+
+    with transaction.atomic():
+        tool = borrowing.tool
+        tool_name = tool.name
+        borrowing.delete()
+        tool.is_available = True
+        tool.available_back_on = None
+        tool.save()
+
+    messages.success(request, f"Your borrowing of '{tool_name}' has been cancelled. Please contact customer services to arrange your refund.")
+    return redirect('profile')
+
 
 def resolve_dispute(request, borrowing_id):
     borrowing = get_object_or_404(Borrowing, id=borrowing_id)
