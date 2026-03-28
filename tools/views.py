@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.utils import timezone
 from datetime import timedelta
 from .models import Tool, Borrowing
-from .forms import BorrowingForm
+from .forms import BorrowingForm, DisputeForm
 from django.contrib import messages
 from django.db.models import Q
 from django.db import transaction
@@ -93,22 +93,21 @@ def cancel_borrowing(request, borrowing_id):
     return redirect('profile')
 
 
+@login_required
 def resolve_dispute(request, borrowing_id):
-    borrowing = get_object_or_404(Borrowing, id=borrowing_id)
+    borrowing = get_object_or_404(Borrowing, id=borrowing_id, user=request.user)
 
     if request.method == 'POST':
-        user_reason = request.POST.get('reason')
-
-        if user_reason:
+        form = DisputeForm(request.POST)
+        if form.is_valid():
             borrowing.status = 'pending'
-            borrowing.user_notes = user_reason 
+            borrowing.user_notes = form.cleaned_data['reason']
             borrowing.save()
-
             messages.success(request, "Your response has been submitted for review.")
         else:
-            messages.error(request, "Please provide a reason for the resolution.")
+            messages.error(request, "Your response must be between 20 and 500 characters.")
 
-    return redirect('profile_view')
+    return redirect('profile')
 
 
 def error_404(request, exception):

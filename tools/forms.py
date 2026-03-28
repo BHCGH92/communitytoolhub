@@ -47,3 +47,12 @@ class BorrowingForm(forms.Form):
                 )
 
         return cleaned_data
+
+
+class DisputeForm(forms.Form):
+    reason = forms.CharField(
+        widget=forms.Textarea(attrs={'rows': 4, 'class': 'form-control', 'placeholder': 'Describe the issue or resolution...', 'minlength': '20', 'maxlength': '500'}),
+        min_length=20,
+        max_length=500,
+        label='Your Response'
+    )

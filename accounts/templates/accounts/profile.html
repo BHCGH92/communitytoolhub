@@ -103,7 +103,7 @@
                                                             <p class="text-muted small">Please provide your response or any additional information to resolve this dispute.</p>
                                                             <div class="mb-3">
                                                                 <label for="reason{{ borrow.id }}" class="form-label fw-bold small">Your Response</label>
-                                                                <textarea class="form-control" id="reason{{ borrow.id }}" name="reason" rows="4" required placeholder="Describe the issue or resolution..."></textarea>
+                                                                <textarea class="form-control" id="reason{{ borrow.id }}" name="reason" rows="4" required minlength="20" maxlength="500" placeholder="Describe the issue or resolution (20–500 characters)..."></textarea>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer bg-light">
