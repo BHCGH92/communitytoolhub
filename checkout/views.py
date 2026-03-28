@@ -7,6 +7,7 @@ from django.utils import timezone
 from datetime import timedelta
 from tools.models import Tool, Borrowing
 from django.db import transaction
+from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_exempt
 from django.http import HttpResponse
 from django.contrib.auth.models import User
@@ -14,6 +15,7 @@ from django.contrib.auth.models import User
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
 
+@login_required
 def create_checkout_session(request, tool_id):
     tool = get_object_or_404(Tool, id=tool_id)
     selected_date = request.POST.get('borrow_date')
@@ -47,6 +49,7 @@ def create_checkout_session(request, tool_id):
         return redirect('tool_detail', pk=tool.id)
 
 
+@login_required
 def payment_success(request):
     tool_id = request.GET.get('tool_id')
     tool = get_object_or_404(Tool, id=tool_id)

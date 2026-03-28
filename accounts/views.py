@@ -10,6 +10,8 @@ from django.core.paginator import Paginator
 
 def register(request):
     """View to handle user registration."""
+    if request.user.is_authenticated:
+        return redirect('tool_list')
     if request.method == 'POST':
         form = RegistrationForm(request.POST)
         if form.is_valid():
